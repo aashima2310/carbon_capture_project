@@ -1,78 +1,130 @@
-AI-Driven Screening for Carbon Capture Materials
-Predicting CO₂ uptake in Metal-Organic Frameworks (MOFs) using Machine Learning.
+# 🧪 AI-Driven Screening for Carbon Capture Materials
 
-Problem Statement
-Over 90,000+ MOF structures exist, but experimentally testing each one for CO₂ adsorption is slow and expensive. This project trains ML models to predict CO₂ uptake purely from geometric structural properties — enabling rapid screening of thousands of candidates without lab experiments.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/LightGBM-02569B?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/XGBoost-FF6600?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Random%20Forest-228B22?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/FFN%20%2F%20MLP-8B008B?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white"/>
+</p>
 
-Dataset
+<p align="center">
+  <b>Domain:</b> Chemical Engineering &nbsp;|&nbsp; <b>Theme:</b> Materials Discovery &nbsp;|&nbsp; <b>Task:</b> Regression
+</p>
 
-Source: Computational MOF Screening Database
-Size: 324,426 MOF structures
-Target: CO₂ uptake at flue gas conditions (0.15 bar, 298 K) in mmol/g
-Input features: Surface area, void fraction, void volume, pore size, volume, weight, topology, functional groups, metal linker, organic linkers
+---
 
+## 📌 Overview
 
-Pipeline
-Data Loading
-    ↓
-EDA — distributions, correlations, missing values
-    ↓
-Cleaning — drop error columns, leakage columns, nulls
-    ↓
-Encoding — frequency encoding, one-hot encoding
-    ↓
-Feature Engineering — interaction features
-    ↓
-Train / Val / Test Split — 70% / 15% / 15%
-    ↓
-StandardScaler — fit on train only
-    ↓
-log1p transform on target
-    ↓
-Model Training — LightGBM, XGBoost, Random Forest, FFN
-    ↓
-Evaluation — R², MSE, MAE
-    ↓
-Scatter plots, Residuals, Feature Importance
+**Metal-Organic Frameworks (MOFs)** are nanoporous crystalline materials with extraordinarily high internal surface areas — a single gram can exceed the surface area of a football field. These structural properties make them promising candidates for selectively adsorbing CO₂ from industrial flue gas streams, a critical step in **Carbon Capture and Storage (CCS)** technologies.
 
-Models and Results
-ModelTrain R²Test R²Test MSETest MAELightGBM0.95420.92660.02110.0813FFN / MLP0.93400.91600.0230—XGBoost0.91350.9095—0.1485Random Forest0.94810.90420.02700.0940
-Best model: LightGBM with Test R² = 0.9266
+Over **90,000+ MOF structures** have been synthesized to date, yet experimentally measuring the CO₂ uptake capacity of each candidate remains prohibitively slow and resource-intensive.
 
-Key Design Decisions
-Why drop leakage columns?
-Columns like working capacity and CO₂/N₂ selectivity are simulation outputs themselves. Keeping them gives a fake high R² — the model learns shortcuts instead of real structure-property relationships.
-Why log1p transform on target?
-CO₂ uptake is right-skewed. Log transforming compresses the scale and helps the model fit all MOFs equally well instead of chasing high-uptake outliers. Predictions are reversed with expm1() before evaluation.
-Why StandardScaler?
-Features like surface area (thousands of m²/g) and void fraction (0 to 1) are on very different scales. Scaling is critical for FFN and useful for pipeline consistency across all models.
+> **Can a data-driven model learn the relationship between a MOF's structural geometry and its CO₂ uptake capacity — and use that knowledge to rapidly screen thousands of untested candidates?**
 
-Tech Stack
+This project answers that question by training and comparing **four machine learning models** that predict CO₂ uptake purely from geometric structural descriptors.
 
-Python, Pandas, NumPy
-Matplotlib, Seaborn
-Scikit-learn
-LightGBM
-XGBoost
-PyTorch / TensorFlow (FFN)
+---
 
+## 📂 Dataset
 
-How to Run
-bashgit clone https://github.com/aashima2310/carbon_capture_project.git
-cd carbon_capture_project
-pip install pandas numpy matplotlib seaborn scikit-learn lightgbm xgboost
-jupyter notebook carbonproject.ipynb
-Place all_MOFs_screening_data.csv in the same folder before running.
+| Property | Details |
+|---|---|
+| Source | Computational MOF Screening Database |
+| Total Structures | 324,426 MOFs |
+| Total Features | 42 columns |
+| Target Variable | `CO2_uptake_P0.15bar_T298K [mmol/g]` |
+| Conditions | Flue gas — 0.15 bar, 298 K |
 
-Repository Structure
-carbon_capture_project/
-├── carbonproject.ipynb
-├── all_MOFs_screening_data.csv
-└── README.md
+### Input Features Used
 
-Future Work
+| Feature | Description |
+|---|---|
+| `surface_area [m²/g]` | Internal surface area of the MOF |
+| `void_fraction` | Fraction of empty pore space |
+| `void_volume [cm³/g]` | Total pore volume |
+| `volume [Å³]` | Unit cell volume |
+| `weight [u]` | Molecular weight |
+| `largest_free_sphere_diameter [Å]` | Largest sphere that can pass through pores |
+| `largest_included_sphere_diameter [Å]` | Largest sphere that fits inside pores |
+| `topology` | Framework connectivity type (11 unique) |
+| `functional_groups` | Chemical functional groups (~400 unique) |
+| `metal_linker` | Metal node type (7 unique) |
+| `organic_linker1/2` | Organic linker types |
 
-Hyperparameter tuning with Optuna
-SHAP values for feature interpretability
-Stacking ensemble across all 4 models
-Graph Neural Networks on crystal structure graphs
+---
+
+## ⚙️ Methodology
+
+### Data Cleaning
+- Dropped all **error/uncertainty columns** — measure simulation convergence, not MOF properties
+- Dropped all **leakage columns** — simulation outputs at other conditions (working capacity, selectivity, uptake at 0.10/0.70 bar) that would give artificially high R²
+- Dropped `MOFname` identifier
+- Removed ~2000 null rows (<1% of data)
+
+### Encoding Strategy
+
+| Column | Strategy | Reason |
+|---|---|---|
+| `functional_groups` | Frequency Encoding | ~400 unique values — too many for one-hot |
+| `topology` | One-Hot Encoding | 11 values, no natural order |
+| `metal_linker` | One-Hot Encoding | 7 values, no natural order |
+| `organic_linker1/2` | Already integers | No encoding needed |
+
+### Feature Engineering
+Three interaction features were created from geometric descriptors:
+- `sa_per_volume` — surface area packed per unit volume
+- `pore_density` — void fraction relative to pore size
+- `void_x_sa` — combined adsorption capacity proxy
+
+### Train / Validation / Test Split
+
+| Split | Percentage | Rows |
+|---|---|---|
+| Train | 70% | ~227,000 |
+| Validation | 15% | ~48,600 |
+| Test | 15% | ~48,600 |
+
+### Why `log1p` Transform on Target?
+CO₂ uptake is **right-skewed** — most MOFs have low uptake but a few have very high values. Training on raw skewed targets causes the model to chase outliers and fit the bulk of data poorly. Applying `log1p(y)` compresses the scale and makes the distribution symmetric, directly improving R². Predictions are reversed with `expm1()` before evaluation.
+
+### Why `StandardScaler`?
+Features span vastly different ranges — `surface_area` can be in the thousands while `void_fraction` is between 0 and 1. StandardScaler normalizes all features to mean=0, std=1. **Critical for FFN** and applied consistently across all models for fair comparison.
+
+---
+
+## 🤖 Models
+
+### 🌲 LightGBM
+Gradient boosting with **leaf-wise tree growth** and histogram binning. Extremely fast on large datasets. Uses early stopping on the validation set to prevent overfitting.
+
+### ⚡ XGBoost
+Gradient boosting with **level-wise tree growth** and built-in L1/L2 regularization. Robust generalization — smallest train/test gap of all models.
+
+### 🌳 Random Forest
+Bagging ensemble of decision trees. Each tree is trained on a random subset of data and features — reduces variance through averaging.
+
+### 🧠 FFN / MLP
+Multi-layer perceptron trained with Adam optimizer. StandardScaler is critical here — unlike tree models, neural networks require scaled inputs for stable gradient descent training.
+
+---
+
+## 📊 Results
+
+| Model | Train R² | Test R² | Test MSE | Test MAE |
+|---|---|---|---|---|
+| 🥇 **LightGBM** | **0.9542** | **0.9266** | **0.0211** | **0.0813** |
+| 🥈 **FFN / MLP** | 0.9340 | 0.9160 | 0.0230 | — |
+| 🥉 **XGBoost** | 0.9135 | 0.9095 | — | 0.1485 |
+| **Random Forest** | 0.9481 | 0.9042 | 0.0270 | 0.0940 |
+
+### Key Observations
+- **LightGBM** achieves the highest test R² (0.9266) and lowest MSE — best overall performer
+- **XGBoost** shows the smallest train-test gap (0.004) — best generalization across all models
+- **FFN** performs competitively at 0.916 without manual tree-based tuning
+- **Random Forest** has the largest test MSE — ensemble averaging loses accuracy on high-uptake MOFs
+
+---
+
+## 🛠️ Tech Stack
