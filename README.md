@@ -128,3 +128,37 @@ Multi-layer perceptron trained with Adam optimizer. StandardScaler is critical h
 ---
 
 ## 🛠️ Tech Stack
+Python 3.10     pandas      numpy       matplotlib
+seaborn         scikit-learn            lightgbm
+xgboost         PyTorch / TensorFlow    Jupyter Notebook
+
+---
+
+## 🚀 How to Run
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/aashima2310/carbon_capture_project.git
+cd carbon_capture_project
+
+# 2. Install dependencies
+pip install pandas numpy matplotlib seaborn scikit-learn lightgbm xgboost
+
+# 3. Launch notebook
+jupyter notebook carbonproject.ipynb
+```
+
+> ⚠️ Place `all_MOFs_screening_data.csv` in the same directory as the notebook before running.
+
+---
+
+---
+
+## 🔮 Future Work
+
+- Hyperparameter tuning with **Optuna** for all 4 models
+- **Stacking ensemble** — LightGBM + XGBoost + FFN
+- **Graph Neural Networks** using MOF crystal structure graphs
+- Include Henry's constant and isosteric heat as additional descriptors
+
+---
