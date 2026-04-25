@@ -1,4 +1,4 @@
-# 🧪 AI-Driven Screening for Carbon Capture Materials
+#  AI-Driven Screening for Carbon Capture Materials
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
@@ -15,7 +15,7 @@
 
 ---
 
-## 📌 Overview
+##  Overview
 
 **Metal-Organic Frameworks (MOFs)** are nanoporous crystalline materials with extraordinarily high internal surface areas — a single gram can exceed the surface area of a football field. These structural properties make them promising candidates for selectively adsorbing CO₂ from industrial flue gas streams, a critical step in **Carbon Capture and Storage (CCS)** technologies.
 
@@ -27,7 +27,7 @@ This project answers that question by training and comparing **four machine lear
 
 ---
 
-## 📂 Dataset
+##  Dataset
 
 | Property | Details |
 |---|---|
@@ -55,7 +55,7 @@ This project answers that question by training and comparing **four machine lear
 
 ---
 
-## ⚙️ Methodology
+##  Methodology
 
 ### Data Cleaning
 - Dropped all **error/uncertainty columns** — measure simulation convergence, not MOF properties
@@ -94,18 +94,18 @@ Features span vastly different ranges — `surface_area` can be in the thousands
 
 ---
 
-## 🤖 Models
+##  Models
 
-### 🌲 LightGBM
+###  LightGBM
 Gradient boosting with **leaf-wise tree growth** and histogram binning. Extremely fast on large datasets. Uses early stopping on the validation set to prevent overfitting.
 
-### ⚡ XGBoost
+###  XGBoost
 Gradient boosting with **level-wise tree growth** and built-in L1/L2 regularization. Robust generalization — smallest train/test gap of all models.
 
-### 🌳 Random Forest
+###  Random Forest
 Bagging ensemble of decision trees. Each tree is trained on a random subset of data and features — reduces variance through averaging.
 
-### 🧠 FFN / MLP
+###  FFN / MLP
 Multi-layer perceptron trained with Adam optimizer. StandardScaler is critical here — unlike tree models, neural networks require scaled inputs for stable gradient descent training.
 
 ---
